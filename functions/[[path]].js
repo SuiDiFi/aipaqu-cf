@@ -301,8 +301,9 @@ export async function onRequest(context) {
   const url = new URL(request.url);
   const path = url.pathname;
 
-  // 非 API 路径交给静态资源托管
-  if (!path.startsWith('/customer/') && !path.startsWith('/admin/')) {
+  // 静态资源（含 /admin/ 下的 html/css/js 等）与目录请求（如 /admin/）交给静态资源托管
+  const isStatic = /\.(html?|css|js|png|jpe?g|gif|svg|ico|woff2?|ttf|eot|wasm|map|json|txt|xml|webp|avif)$/i.test(path);
+  if (isStatic || path.endsWith('/') || (!path.startsWith('/customer/') && !path.startsWith('/admin/'))) {
     return next();
   }
 

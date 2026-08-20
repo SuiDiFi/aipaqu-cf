@@ -9,7 +9,7 @@ pages_build_output_dir = "."
 # 部署前将生成的 id 填入下方
 [[kv_namespaces]]
 binding = "AIPAQ_DATA"
-id = "REPLACE_WITH_KV_NAMESPACE_ID"
+id = "ae27024949f44dc097b5e4a2661d832c"
 
 # 会话 token 签名密钥（建议部署后通过 wrangler secret put SECRET 覆盖）
 [vars]
