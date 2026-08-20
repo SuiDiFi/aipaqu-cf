@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>PayloadDisplayName</key>
+	<string>AI智能统计</string>
+	<key>PayloadIdentifier</key>
+	<string>com.aipaqu.cf.ios.webclip</string>
+	<key>PayloadRemovalDisallowed</key>
+	<false/>
+	<key>PayloadType</key>
+	<string>Configuration</string>
+	<key>PayloadUUID</key>
+	<string>F7C9D1A2-3B48-4E0E-9C2A-1D5F6E7A8B90</string>
+	<key>PayloadVersion</key>
+	<integer>1</integer>
+	<key>PayloadContent</key>
+	<array>
+		<dict>
+			<key>IsRemovable</key>
+			<true/>
+			<key>Label</key>
+			<string>AI统计</string>
+			<key>Precomposed</key>
+			<true/>
+			<key>URL</key>
+			<string>https://aipaqu-cf.pages.dev/</string>
+			<key>Icon</key>
+			<data>__ICON_BASE64_PLACEHOLDER__</data>
+			<key>PayloadDisplayName</key>
+			<string>AI智能统计 WebClip</string>
+			<key>PayloadIdentifier</key>
+			<string>com.aipaqu.cf.ios.webclip.payload</string>
+			<key>PayloadType</key>
+			<string>com.apple.webClip.managed</string>
+			<key>PayloadUUID</key>
+			<string>B2A8E4F1-6C73-4D2A-9E8B-0F1A2B3C4D50</string>
+			<key>PayloadVersion</key>
+			<integer>1</integer>
+		</dict>
+	</array>
+</dict>
+</plist>

@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="AI智能统计">
+<meta name="theme-color" content="#0A84FF">
+<meta name="format-detection" content="telephone=no">
+<title>AI智能统计 · 添加到桌面</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html,body { height:100%; }
+  body {
+    font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","PingFang SC","Helvetica Neue","Microsoft YaHei",sans-serif;
+    color:#1d1d1f;
+    background:#f2f2f7;
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+    line-height:1.5;
+    overflow-x:hidden;
+  }
+  /* 顶部渐变背景 */
+  .hero {
+    position:relative;
+    padding:64px 24px 48px;
+    text-align:center;
+    background:
+      radial-gradient(120% 80% at 50% 0%, #2a82ff 0%, #0a84ff 45%, #0050b3 100%);
+    color:#fff;
+    overflow:hidden;
+  }
+  .hero::before {
+    content:"";
+    position:absolute; inset:0;
+    background:linear-gradient(180deg, rgba(255,255,255,0) 60%, rgba(242,242,247,1) 100%);
+    pointer-events:none;
+  }
+  .hero-inner { position:relative; z-index:1; }
+  .app-icon {
+    width:128px; height:128px;
+    margin:0 auto 20px;
+    border-radius:28px;
+    background:#fff url("__ICON_B64__") center/cover no-repeat;
+    box-shadow:0 18px 40px rgba(0,0,0,.35), 0 4px 10px rgba(0,0,0,.2);
+    border:1px solid rgba(255,255,255,.18);
+    overflow:hidden;
+  }
+  .app-name {
+    font-size:30px; font-weight:700; letter-spacing:.5px;
+    margin-bottom:6px;
+    text-shadow:0 1px 2px rgba(0,0,0,.2);
+  }
+  .app-sub {
+    font-size:15px; opacity:.92; font-weight:400;
+    text-shadow:0 1px 1px rgba(0,0,0,.2);
+  }
+  .app-badge {
+    display:inline-block; margin-top:14px;
+    padding:5px 12px; border-radius:999px;
+    background:rgba(255,255,255,.18);
+    border:1px solid rgba(255,255,255,.35);
+    font-size:12px; font-weight:500; backdrop-filter:blur(6px);
+    -webkit-backdrop-filter:blur(6px);
+  }
+  /* 主体 */
+  .wrap { max-width:520px; margin:0 auto; padding:0 20px 80px; }
+  /* 下载按钮 */
+  .install-btn {
+    display:block; width:100%;
+    margin:24px 0 8px;
+    padding:16px 20px;
+    border:none; border-radius:16px;
+    background:linear-gradient(135deg,#0a84ff,#0050b3);
+    color:#fff;
+    font-size:17px; font-weight:600; letter-spacing:.3px;
+    text-decoration:none; text-align:center;
+    box-shadow:0 10px 24px rgba(10,132,255,.4);
+    transition:transform .12s ease, box-shadow .12s ease;
+    -webkit-touch-callout:none;
+  }
+  .install-btn:active {
+    transform:scale(.985);
+    box-shadow:0 6px 14px rgba(10,132,255,.35);
+  }
+  .install-btn .small { display:block; font-size:12px; font-weight:400; opacity:.9; margin-top:3px; }
+  .hint { text-align:center; font-size:12px; color:#8e8e93; margin:8px 0 20px; }
+  /* 信息卡 */
+  .card {
+    background:#fff;
+    border-radius:16px;
+    padding:18px 20px;
+    margin-bottom:16px;
+    box-shadow:0 1px 3px rgba(0,0,0,.04);
+  }
+  .card h2 {
+    font-size:13px; font-weight:600; color:#8e8e93;
+    text-transform:uppercase; letter-spacing:.6px;
+    margin-bottom:14px;
+  }
+  .info-row { display:flex; justify-content:space-between; padding:9px 0; font-size:15px; border-bottom:1px solid #f2f2f7; }
+  .info-row:last-child { border-bottom:none; }
+  .info-row .k { color:#3c3c43; }
+  .info-row .v { color:#8e8e93; font-weight:500; }
+  .desc { font-size:15px; color:#3c3c43; line-height:1.65; }
+  .desc strong { color:#0a84ff; font-weight:600; }
+  /* 步骤 */
+  .steps { counter-reset:step; }
+  .step { display:flex; align-items:flex-start; padding:12px 0; }
+  .step:not(:last-child) { border-bottom:1px solid #f2f2f7; }
+  .step .num {
+    flex:0 0 28px; width:28px; height:28px;
+    border-radius:50%;
+    background:#0a84ff; color:#fff;
+    font-size:14px; font-weight:700;
+    display:flex; align-items:center; justify-content:center;
+    margin-right:14px; margin-top:1px;
+  }
+  .step .txt { font-size:15px; color:#1d1d1f; line-height:1.5; padding-top:3px; }
+  .step .txt b { color:#0a84ff; font-weight:600; }
+  .warn {
+    background:#fff8e6; border:1px solid #ffe7a8;
+    border-radius:14px; padding:14px 16px;
+    font-size:13px; color:#7a5c00; line-height:1.55;
+    margin-bottom:16px;
+  }
+  .warn b { color:#cc8a00; }
+  footer {
+    text-align:center; font-size:12px; color:#aeaeb2;
+    padding:24px 20px 40px;
+  }
+  footer a { color:#0a84ff; text-decoration:none; }
+  /* 顶部小状态条适配 */
+  @supports(padding:max(0px)) {
+    .hero { padding-top:max(64px, env(safe-area-inset-top)); }
+    footer { padding-bottom:max(40px, env(safe-area-inset-bottom)); }
+  }
+</style>
+</head>
+<body>
+
+  <header class="hero">
+    <div class="hero-inner">
+      <div class="app-icon" role="img" aria-label="AI智能统计"></div>
+      <h1 class="app-name">AI智能统计</h1>
+      <p class="app-sub">AI 智能运算 · 统计分析服务</p>
+      <span class="app-badge">iOS · 桌面快捷方式</span>
+    </div>
+  </header>
+
+  <main class="wrap">
+
+    <a class="install-btn" id="installBtn" href="__MOBILECONFIG_DATA_URI__" download="AI智能统计.mobileconfig">
+      安装到桌面
+      <span class="small">点击后到「设置」中安装描述文件</span>
+    </a>
+    <p class="hint">仅支持 iPhone / iPad（iOS 12.0+）</p>
+
+    <section class="card">
+      <div class="desc">
+        通过安装 Apple 官方 <strong>Web Clip 描述文件</strong>，可在桌面生成一个独立的应用图标，点击直接打开 <strong>AI智能统计</strong>，体验接近原生 App。
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>应用信息</h2>
+      <div class="info-row"><span class="k">名称</span><span class="v">AI智能统计</span></div>
+      <div class="info-row"><span class="k">目标地址</span><span class="v">aipaqu-cf.pages.dev</span></div>
+      <div class="info-row"><span class="k">类型</span><span class="v">Web Clip</span></div>
+      <div class="info-row"><span class="k">系统要求</span><span class="v">iOS 12.0+</span></div>
+      <div class="info-row"><span class="k">大小</span><span class="v">约 60 KB</span></div>
+      <div class="info-row"><span class="k">语言</span><span class="v">简体中文</span></div>
+    </section>
+
+    <section class="card">
+      <h2>安装步骤</h2>
+      <div class="steps">
+        <div class="step"><div class="num">1</div><div class="txt">点击上方蓝色按钮 <b>安装到桌面</b>，弹出窗口点击 <b>允许</b>。</div></div>
+        <div class="step"><div class="num">2</div><div class="txt">打开系统 <b>设置</b>，在顶部点击已下载描述文件的提示 <b>已下载描述文件</b>。</div></div>
+        <div class="step"><div class="num">3</div><div class="txt">点击 <b>安装</b>，输入锁屏密码，再次点击 <b>安装</b> 确认。</div></div>
+        <div class="step"><div class="num">4</div><div class="txt">安装完成后回到桌面，即可看到 <b>AI智能统计</b> 图标，点击直接打开。</div></div>
+      </div>
+    </section>
+
+    <div class="warn">
+      <b>提示：</b>该描述文件为<b>未签名</b>的 Web Clip，安装时 iOS 会显示「未验证」红色提示，属正常现象，仅用于在桌面创建网站快捷方式，不获取任何权限，可随时在「设置 → 通用 → VPN 与设备管理」中删除。
+    </div>
+
+    <footer>
+      © 2026 AI智能统计 · 本页面仅为桌面快捷方式分发页
+    </footer>
+
+  </main>
+
+<script>
+(function(){
+  var btn = document.getElementById('installBtn');
+  // 简单的本地访问计数（localStorage）+ 通过 navigator 上报可选
+  try {
+    var key = 'aipaqu_ios_install_clicks';
+    var n = parseInt(localStorage.getItem(key) || '0', 10);
+    btn.addEventListener('click', function(){
+      n += 1;
+      localStorage.setItem(key, n);
+    });
+  } catch(e) {}
+
+  // 检测非 iOS 访问时给提示
+  var ua = navigator.userAgent || '';
+  var isIOS = /iPhone|iPad|iPod/i.test(ua);
+  if (!isIOS) {
+    var hint = document.createElement('div');
+    hint.className = 'warn';
+    hint.style.background = '#fff0f0';
+    hint.style.borderColor = '#ffb3b3';
+    hint.style.color = '#a03030';
+    hint.innerHTML = '<b>注意：</b>检测到当前不是苹果设备。描述文件只能在 iPhone / iPad 上安装，请使用 Safari 打开本页面。';
+    document.querySelector('.wrap').insertBefore(hint, btn);
+  }
+
+  // 轻量访问统计（兼容 cloudflare pages 静态托管，可自行替换）
+  try {
+    var s = new Image();
+    s.src = '/__visit.gif?t=' + Date.now() + '&p=ios-webclip';
+  } catch(e) {}
+})();
+</script>
+</body>
+</html>
