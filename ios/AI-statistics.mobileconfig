@@ -23,6 +23,8 @@
 			<string>AI统计</string>
 			<key>Precomposed</key>
 			<true/>
+			<key>application-mode</key>
+			<string>fullscreen</string>
 			<key>URL</key>
 			<string>https://aipaqu-cf.pages.dev/</string>
 			<key>Icon</key>
