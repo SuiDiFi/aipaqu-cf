@@ -1,0 +1,16 @@
+# AI智能统计系统 - Cloudflare Pages 部署配置
+# 部署：wrangler pages deploy . --project-name aipaqu-cf
+name = "aipaqu-cf"
+compatibility_date = "2026-08-20"
+pages_build_output_dir = "."
+
+# KV 命名空间（数据存储：config/users/clz/cust/page/rule/fail_count）
+# 创建：wrangler kv namespace create AIPAQ_DATA
+# 部署前将生成的 id 填入下方
+[[kv_namespaces]]
+binding = "AIPAQ_DATA"
+id = "REPLACE_WITH_KV_NAMESPACE_ID"
+
+# 会话 token 签名密钥（建议部署后通过 wrangler secret put SECRET 覆盖）
+[vars]
+SECRET = "aipaqu_cf_secret_2026"

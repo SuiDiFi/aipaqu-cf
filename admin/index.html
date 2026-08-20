@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>AI统计系统 - 管理后台</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:"Microsoft YaHei",-apple-system,Segoe UI,sans-serif; background:#f0f2f5; color:#303133;
+  -webkit-font-smoothing:antialiased; }
+a { color:#409eff; text-decoration:none; }
+::-webkit-scrollbar { width:8px; height:8px; }
+::-webkit-scrollbar-thumb { background:#c8cdd4; border-radius:4px; }
+::-webkit-scrollbar-thumb:hover { background:#a8b0ba; }
+::-webkit-scrollbar-track { background:transparent; }
+
+/* 登录 */
+.login-wrap { min-height:100vh; display:flex; align-items:center; justify-content:center; padding:20px;
+  background:linear-gradient(135deg,#1f2d3d 0%,#2b4a6f 60%,#3a6ea5 100%); position:relative; overflow:hidden; }
+.login-wrap::before, .login-wrap::after { content:""; position:absolute; border-radius:50%; filter:blur(60px); opacity:.25; }
+.login-wrap::before { width:340px; height:340px; background:#409eff; top:-80px; left:-80px; }
+.login-wrap::after { width:420px; height:420px; background:#67c23a; bottom:-120px; right:-100px; }
+.login-box { position:relative; background:#fff; border-radius:14px; padding:40px 36px; width:100%; max-width:380px;
+  box-shadow:0 12px 48px rgba(0,0,0,.32); }
+.login-box h1 { font-size:20px; text-align:center; margin-bottom:6px; }
+.login-box .sub { font-size:12px; color:#909399; text-align:center; margin-bottom:26px; }
+.login-box label { display:block; font-size:13px; color:#606266; margin-bottom:6px; }
+.login-box input { width:100%; padding:11px 12px; border:1px solid #dcdfe6; border-radius:8px;
+  font-size:14px; outline:none; transition:border .2s, box-shadow .2s; margin-bottom:18px; }
+.login-box input:focus { border-color:#409eff; box-shadow:0 0 0 3px rgba(64,158,255,.15); }
+.login-box button { width:100%; padding:11px; background:#409eff; color:#fff; border:none;
+  border-radius:8px; font-size:15px; cursor:pointer; transition:background .2s; }
+.login-box button:hover { background:#66b1ff; }
+.login-err { color:#f56c6c; font-size:12px; text-align:center; margin-top:10px; min-height:16px; }
+
+/* 布局 */
+.layout { display:flex; min-height:100vh; }
+.sidebar { width:220px; background:#1f2d3d; color:#c0c4cc; flex-shrink:0; display:flex; flex-direction:column;
+  position:sticky; top:0; height:100vh; overflow-y:auto; z-index:50; transition:transform .25s ease; }
+.sidebar .brand { padding:20px 18px; color:#fff; display:flex; align-items:center; gap:10px;
+  border-bottom:1px solid rgba(255,255,255,.08); }
+.brand-logo { width:34px; height:34px; border-radius:8px; background:linear-gradient(135deg,#409eff,#67c23a);
+  display:flex; align-items:center; justify-content:center; color:#fff; font-size:15px; font-weight:bold; flex-shrink:0; }
+.sidebar .brand .brand-text { line-height:1.3; }
+.sidebar .brand .brand-text b { display:block; font-size:15px; font-weight:bold; }
+.sidebar .brand small { display:block; font-size:11px; font-weight:normal; color:#7a8794; margin-top:2px; }
+.menu { padding:12px 0; flex:1; }
+.menu-item { display:flex; align-items:center; padding:12px 18px; font-size:14px; cursor:pointer;
+  transition:background .2s, color .2s; border-left:3px solid transparent; }
+.menu-item:hover { background:rgba(255,255,255,.06); color:#fff; }
+.menu-item.active { background:rgba(64,158,255,.18); color:#fff; border-left-color:#409eff; }
+.mi { width:17px; height:17px; fill:currentColor; margin-right:10px; flex-shrink:0; }
+.sidebar .foot { padding:12px 18px; font-size:11px; color:#5c6a77; border-top:1px solid rgba(255,255,255,.06); }
+.sidebar-backdrop { display:none; position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:40; }
+.sidebar-backdrop.show { display:block; }
+
+.main { flex:1; display:flex; flex-direction:column; min-width:0; }
+.topbar { background:#fff; height:56px; display:flex; align-items:center; justify-content:space-between;
+  padding:0 24px; box-shadow:0 1px 4px rgba(0,21,41,.08); position:sticky; top:0; z-index:30; }
+.topbar .title { font-size:16px; font-weight:bold; display:flex; align-items:center; gap:10px; min-width:0; }
+.menu-toggle { display:none; width:36px; height:36px; border:none; background:transparent; border-radius:8px;
+  cursor:pointer; align-items:center; justify-content:center; color:#606266; flex-shrink:0; }
+.menu-toggle:hover { background:#f0f2f5; }
+.menu-toggle svg { width:22px; height:22px; fill:currentColor; }
+.topbar .user { font-size:13px; color:#606266; display:flex; align-items:center; gap:6px; flex-shrink:0; }
+.topbar .logout { margin-left:8px; color:#f56c6c; cursor:pointer; font-size:13px; padding:4px 10px;
+  border-radius:6px; transition:background .2s; }
+.topbar .logout:hover { background:#fef0f0; }
+.content { padding:24px; flex:1; overflow:auto; max-width:1440px; width:100%; margin:0 auto; }
+
+.card { background:#fff; border-radius:10px; padding:20px; margin-bottom:20px;
+  box-shadow:0 1px 4px rgba(0,21,41,.06); transition:box-shadow .2s; }
+.card:hover { box-shadow:0 3px 12px rgba(0,21,41,.09); }
+.card h3 { font-size:15px; margin-bottom:16px; padding-bottom:10px; border-bottom:1px solid #f0f0f0;
+  display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+
+/* 概览 */
+.stat-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); gap:14px; }
+.stat { background:#f8fafc; border:1px solid #eef0f3; border-radius:10px; padding:18px 14px; text-align:center;
+  transition:transform .15s, box-shadow .15s; }
+.stat:hover { transform:translateY(-2px); box-shadow:0 4px 12px rgba(0,21,41,.08); }
+.stat .num { font-size:26px; font-weight:bold; color:#1f2d3d; word-break:break-all; }
+.stat .lab { font-size:12px; color:#909399; margin-top:6px; }
+
+/* 表单 */
+.form-row { display:flex; align-items:center; margin-bottom:14px; }
+.form-row label { width:110px; font-size:13px; color:#606266; flex-shrink:0; }
+.form-row input, .form-row select { flex:1; padding:9px 10px; border:1px solid #dcdfe6; border-radius:8px;
+  font-size:13px; outline:none; max-width:320px; transition:border .2s, box-shadow .2s; }
+.form-row input:focus, .form-row select:focus { border-color:#409eff; box-shadow:0 0 0 3px rgba(64,158,255,.12); }
+.btn { display:inline-block; padding:8px 18px; border:none; border-radius:8px; font-size:13px;
+  cursor:pointer; margin-right:10px; transition:background .2s, color .2s, border-color .2s, transform .1s;
+  touch-action:manipulation; }
+.btn:active { transform:scale(.97); }
+.btn-primary { background:#409eff; color:#fff; }
+.btn-primary:hover { background:#66b1ff; }
+.btn-danger { background:#f56c6c; color:#fff; }
+.btn-danger:hover { background:#f78989; }
+.btn-default { background:#fff; color:#606266; border:1px solid #dcdfe6; }
+.btn-default:hover { color:#409eff; border-color:#409eff; }
+.btn-sm { padding:4px 12px; font-size:12px; margin-right:6px; }
+.btn-block { display:block; width:100%; margin:4px 0 0; text-align:center; }
+.btn-group { display:flex; flex-wrap:wrap; gap:10px; margin-top:14px; }
+.btn-group .btn { margin-right:0; }
+
+/* 表格 */
+.table-wrap { overflow-x:auto; -webkit-overflow-scrolling:touch; margin:0 -4px; padding:0 4px; }
+table { width:100%; border-collapse:collapse; font-size:13px; min-width:520px; }
+th, td { border:1px solid #ebeef5; padding:9px 10px; text-align:left; }
+th { background:#f5f7fa; color:#909399; font-weight:normal; white-space:nowrap; }
+td input, td select { width:100%; padding:7px 8px; border:1px solid #dcdfe6; border-radius:6px; font-size:13px; outline:none; }
+td input:focus, td select:focus { border-color:#409eff; }
+.row-actions { white-space:nowrap; text-align:center; }
+.row-actions .btn { margin:2px 4px 2px 0; }
+
+/* 标签 */
+.tag { display:inline-block; padding:2px 10px; border-radius:10px; font-size:12px; }
+.tag-blue { background:#ecf5ff; color:#409eff; }
+.tag-green { background:#f0f9eb; color:#67c23a; }
+.tag-orange { background:#fdf6ec; color:#e6a23c; }
+
+/* 提示 */
+.toast { position:fixed; top:20px; left:50%; transform:translateX(-50%); padding:10px 22px;
+  border-radius:8px; color:#fff; font-size:14px; z-index:999; opacity:0; transition:opacity .3s;
+  max-width:calc(100vw - 40px); text-align:center; box-shadow:0 4px 16px rgba(0,0,0,.18); }
+.toast.ok { background:#67c23a; }
+.toast.err { background:#f56c6c; }
+.toast.show { opacity:1; }
+
+/* 用户管理 */
+.user-stats { display:grid; grid-template-columns:repeat(2,1fr); gap:14px; margin-bottom:20px; }
+.user-stat { background:#fff; border-radius:10px; padding:18px 20px; text-align:center;
+  box-shadow:0 1px 4px rgba(0,21,41,.06); }
+.user-stat .num { font-size:26px; font-weight:bold; color:#1f2d3d; }
+.user-stat .lab { font-size:12px; color:#909399; margin-top:6px; }
+.users-layout { display:grid; grid-template-columns:320px 1fr; gap:20px; align-items:start; }
+.users-layout > .card, .setting-grid > .card { min-width:0; }
+.user-add-card .form-row { margin-bottom:14px; }
+.user-add-card .form-row label { width:70px; }
+.pwd-cell { display:inline-flex; align-items:center; gap:8px; flex-wrap:wrap; }
+.pwd-cell .pwd-dots { font-family:Consolas,monospace; letter-spacing:2px; color:#606266; }
+.pwd-cell .pwd-text { font-family:Consolas,monospace; color:#303133; }
+
+/* 系统设置 */
+.setting-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:20px; align-items:start; }
+.setting-grid .card { margin-bottom:0; }
+.setting-grid .card.wide { grid-column:1 / -1; }
+
+textarea { width:100%; border:1px solid #dcdfe6; border-radius:8px; padding:10px; font-size:13px;
+  font-family:Consolas,monospace; outline:none; min-height:300px; resize:vertical; transition:border .2s, box-shadow .2s; }
+textarea:focus { border-color:#409eff; box-shadow:0 0 0 3px rgba(64,158,255,.12); }
+
+.hidden { display:none !important; }
+.tip { font-size:12px; color:#909399; margin-top:8px; line-height:1.6; }
+.empty { text-align:center; color:#909399; padding:30px 0; font-size:13px; }
+.cell-title { font-weight:600; color:#303133; line-height:1.5; }
+.cell-note { font-size:12px; color:#909399; line-height:1.4; margin-top:2px; }
+
+/* 响应式 */
+@media (max-width:1024px) {
+  .setting-grid { grid-template-columns:1fr; }
+}
+@media (max-width:960px) {
+  .users-layout { grid-template-columns:1fr; }
+}
+@media (max-width:768px) {
+  .sidebar { position:fixed; left:0; top:0; bottom:0; width:240px; transform:translateX(-100%);
+    box-shadow:4px 0 24px rgba(0,0,0,.2); }
+  .sidebar.open { transform:none; }
+  .menu-toggle { display:flex; }
+  .content { padding:14px; }
+  .topbar { padding:0 14px; }
+  .card { padding:16px; border-radius:10px; }
+  .stat-grid { grid-template-columns:repeat(2,1fr); gap:10px; }
+  .user-stats { grid-template-columns:repeat(2,1fr); gap:10px; }
+  .setting-grid { grid-template-columns:1fr; }
+  textarea { min-height:200px; }
+}
+@media (max-width:600px) {
+  .form-row { flex-direction:column; align-items:stretch; }
+  .form-row label { width:auto; margin-bottom:6px; }
+  .form-row input, .form-row select { max-width:none; width:100%; }
+  .stat-grid { grid-template-columns:repeat(2,1fr); }
+  .stat .num { font-size:22px; }
+  .login-box { padding:30px 22px; }
+}
+@media (max-width:400px) {
+  .stat-grid { grid-template-columns:1fr 1fr; }
+  .user-stats { grid-template-columns:1fr; }
+  .topbar .user { font-size:12px; }
+}
+</style>
+</head>
+<body>
+
+<!-- 登录 -->
+<div id="loginPage" class="login-wrap">
+  <div class="login-box">
+    <h1>AI统计系统 · 管理后台</h1>
+    <div class="sub">请使用系统登录密码进入管理</div>
+    <label>管理密码</label>
+    <input id="loginPwd" type="password" placeholder="请输入管理密码" onkeydown="if(event.key==='Enter')doLogin()">
+    <button onclick="doLogin()">登 录</button>
+    <div id="loginErr" class="login-err"></div>
+  </div>
+</div>
+
+<!-- 主界面 -->
+<div id="appPage" class="layout hidden">
+  <div id="sidebarBackdrop" class="sidebar-backdrop" onclick="toggleSidebar(false)"></div>
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <div class="brand-logo">统</div>
+      <div class="brand-text"><b>AI统计系统</b><small>管理后台</small></div>
+    </div>
+    <div class="menu">
+      <div class="menu-item active" data-view="overview" onclick="switchView(this)">
+        <svg class="mi" viewBox="0 0 24 24"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>概览
+      </div>
+      <div class="menu-item" data-view="users" onclick="switchView(this)">
+        <svg class="mi" viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>用户管理
+      </div>
+      <div class="menu-item" data-view="page" onclick="switchView(this)">
+        <svg class="mi" viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>页面文案
+      </div>
+      <div class="menu-item" data-view="rule" onclick="switchView(this)">
+        <svg class="mi" viewBox="0 0 24 24"><path d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0l4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z"/></svg>解析规则
+      </div>
+      <div class="menu-item" data-view="setting" onclick="switchView(this)">
+        <svg class="mi" viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94L14.4 2.81c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41L9.25 5.35C8.66 5.59 8.12 5.92 7.63 6.29L5.24 5.33c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.22-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>系统设置
+      </div>
+    </div>
+    <div class="foot">本地化部署 · v1.0</div>
+  </aside>
+  <div class="main">
+    <div class="topbar">
+      <div class="title">
+        <button class="menu-toggle" onclick="toggleSidebar()" aria-label="打开菜单">
+          <svg viewBox="0 0 24 24"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg>
+        </button>
+        <span id="pageTitle">概览</span>
+      </div>
+      <div class="user">管理员<span class="logout" onclick="doLogout()">退出登录</span></div>
+    </div>
+    <div class="content">
+
+      <!-- 概览 -->
+      <div id="view-overview">
+        <div class="card">
+          <h3>系统概览</h3>
+          <div class="stat-grid" id="overviewStats"></div>
+        </div>
+      </div>
+
+      <!-- 用户管理 -->
+      <div id="view-users" class="hidden">
+        <div class="user-stats">
+          <div class="user-stat"><div class="num" id="statTotal">0</div><div class="lab">用户总数</div></div>
+          <div class="user-stat"><div class="num" id="statNormal">0</div><div class="lab">普通用户</div></div>
+        </div>
+        <div class="users-layout">
+          <div class="card user-add-card">
+            <h3>添加新用户 <span class="tag tag-blue">users.json</span></h3>
+            <div class="form-row"><label>用户名</label><input id="newUserName" placeholder="如：张三" autocomplete="off"></div>
+            <div class="form-row"><label>登录密码</label><input id="newUserPwd" type="password" placeholder="为该用户设置登录密码" autocomplete="new-password"></div>
+            <button class="btn btn-primary btn-block" onclick="addUser()">添加用户</button>
+            <div class="tip">新用户使用该密码即可登录业务端；每个用户一个独立登录密码。</div>
+          </div>
+          <div class="card user-list-card">
+            <h3>用户列表 <span class="tag tag-blue">登录密码</span></h3>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th style="width:36px">#</th><th>用户名</th><th>登录密码</th><th style="width:170px">操作</th></tr></thead>
+                <tbody id="userRows"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 页面文案 -->
+      <div id="view-page" class="hidden">
+        <div class="card">
+          <h3>页面文案配置 <span class="tag tag-blue">page.json</span></h3>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th style="width:36px">#</th><th style="width:220px">标题 / 说明</th><th>文案内容</th></tr></thead>
+              <tbody id="pageRows"></tbody>
+            </table>
+          </div>
+          <div class="btn-group">
+            <button class="btn btn-default" onclick="addPageRow()">+ 新增字段</button>
+            <button class="btn btn-primary" onclick="savePage()">保存文案</button>
+          </div>
+          <div class="tip">修改后需刷新业务页面生效。新增字段时，先填写下方标题与文案内容，保存后自动生成内部字段名。</div>
+        </div>
+      </div>
+
+      <!-- 解析规则 -->
+      <div id="view-rule" class="hidden">
+        <div class="card">
+          <h3>解析规则 <span class="tag tag-orange" id="ruleSizeTag">--</span></h3>
+          <div class="form-row">
+            <label>规则来源</label>
+            <button class="btn btn-default" onclick="fetchRule()">从本地文件加载</button>
+            <span class="tip" style="margin-left:10px;">parse_rule.txt</span>
+          </div>
+          <textarea id="ruleText" placeholder="解析规则文本..."></textarea>
+          <div class="btn-group">
+            <button class="btn btn-primary" onclick="saveRule()">保存规则</button>
+            <button class="btn btn-default" onclick="loadRule()">重新读取</button>
+          </div>
+          <div class="tip">保存后立即通过 /customer/ping 下发给 wasm，业务页面刷新即可生效。</div>
+        </div>
+      </div>
+
+      <!-- 系统设置 -->
+      <div id="view-setting" class="hidden">
+        <div class="setting-grid">
+          <div class="card">
+            <h3>修改管理后台登录密码</h3>
+            <div class="form-row"><label>当前管理密码</label><input id="oldPwd" type="password"></div>
+            <div class="form-row"><label>新密码</label><input id="newPwd" type="password"></div>
+            <div class="form-row"><label>确认新密码</label><input id="confirmPwd" type="password"></div>
+            <button class="btn btn-primary" onclick="updatePassword()">更新密码</button>
+            <div class="tip">仅修改管理后台登录密码，不影响业务端各用户登录密码。</div>
+          </div>
+          <div class="card">
+            <h3>会员到期时间</h3>
+            <div class="form-row"><label>到期日期</label><input id="endTimeInput" type="date"></div>
+            <button class="btn btn-primary" onclick="updateEndTime()">更新时间</button>
+            <div class="tip">格式 YYYY-MM-DD；到期后登录令牌将失效。</div>
+          </div>
+          <div class="card wide">
+            <h3>数据文件</h3>
+            <div class="tip">业务数据保存在本地：E:\aipaqu\server\data（clz.json / cust.json / page.json / config.json）<br>解析规则：E:\aipaqu\server\parse_rule.txt</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+var PASSWORD = localStorage.getItem('aipaqu_admin_pwd') || '';
+
+function toast(msg, ok) {
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast ' + (ok ? 'ok' : 'err') + ' show';
+  clearTimeout(t._timer);
+  t._timer = setTimeout(function(){ t.className = 'toast'; }, 2200);
+}
+
+function api(path, body) {
+  body = body || {};
+  body.password = PASSWORD;
+  return fetch('/admin/' + path, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  }).then(function(r){ return r.json(); });
+}
+
+/* ---------- 侧边栏（移动端抽屉） ---------- */
+function toggleSidebar(force) {
+  var sb = document.getElementById('sidebar');
+  var bk = document.getElementById('sidebarBackdrop');
+  var open = (force === undefined) ? !sb.classList.contains('open') : !!force;
+  sb.classList.toggle('open', open);
+  bk.classList.toggle('show', open);
+}
+
+/* ---------- 登录 ---------- */
+function doLogin() {
+  var pwd = document.getElementById('loginPwd').value.trim();
+  if (!pwd) {
+    document.getElementById('loginErr').textContent = '请输入管理密码';
+    return;
+  }
+  PASSWORD = pwd;
+  api('overview').then(function(res) {
+    if (res.code === 0) {
+      localStorage.setItem('aipaqu_admin_pwd', pwd);
+      document.getElementById('loginPage').classList.add('hidden');
+      document.getElementById('appPage').classList.remove('hidden');
+      loadOverview();
+      loadRule();
+      loadEndTime();
+      toast('登录成功', true);
+    } else {
+      document.getElementById('loginErr').textContent = res.msg || '密码错误';
+      PASSWORD = '';
+    }
+  }).catch(function(){ document.getElementById('loginErr').textContent = '无法连接后端服务'; });
+}
+
+function doLogout() {
+  localStorage.removeItem('aipaqu_admin_pwd');
+  location.reload();
+}
+
+/* ---------- 视图切换 ---------- */
+var VIEW_TITLES = {
+  overview: '概览',
+  users: '用户管理',
+  page: '页面文案', rule: '解析规则', setting: '系统设置'
+};
+function switchView(el) {
+  var v = el.getAttribute('data-view');
+  document.querySelectorAll('.menu-item').forEach(function(i){ i.classList.remove('active'); });
+  el.classList.add('active');
+  Object.keys(VIEW_TITLES).forEach(function(k){
+    document.getElementById('view-' + k).classList.toggle('hidden', k !== v);
+  });
+  document.getElementById('pageTitle').textContent = VIEW_TITLES[v];
+  if (window.innerWidth <= 768) toggleSidebar(false);
+  if (v === 'overview') loadOverview();
+  if (v === 'users') loadUsers();
+  if (v === 'page') loadPage();
+  if (v === 'rule') loadRule();
+  if (v === 'setting') loadEndTime();
+}
+
+/* ---------- 概览 ---------- */
+function loadOverview() {
+  api('overview').then(function(res) {
+    if (res.code !== 0) return errOut(res);
+    var d = res.data;
+    document.getElementById('overviewStats').innerHTML =
+      '<div class="stat"><div class="num">' + d.clz_count + '</div><div class="lab">科目数</div></div>' +
+      '<div class="stat"><div class="num">' + d.cust_clz_count + '</div><div class="lab">已配置科目数</div></div>' +
+      '<div class="stat"><div class="num">' + d.cust_count + '</div><div class="lab">客户/上家配置行数</div></div>' +
+      '<div class="stat"><div class="num">' + fmtSize(d.rule_size) + '</div><div class="lab">解析规则大小</div></div>' +
+      '<div class="stat"><div class="num" style="font-size:20px">' + d.end_time + '</div><div class="lab">会员到期时间</div></div>' +
+      '<div class="stat"><div class="num">' + d.page_fields + '</div><div class="lab">页面文案字段数</div></div>';
+  }).catch(function(){ toast('加载概览失败', false); });
+}
+function fmtSize(n) {
+  if (n < 1024) return n + ' B';
+  if (n < 1048576) return (n / 1024).toFixed(1) + ' KB';
+  return (n / 1048576).toFixed(2) + ' MB';
+}
+
+/* ---------- 用户管理 ---------- */
+function loadUsers() {
+  api('getUsers').then(function(res) {
+    if (res.code !== 0) return errOut(res);
+    var users = (res.data || []).filter(function(u){ return u.username !== 'admin'; });
+    var html = '';
+    users.forEach(function(u, i) {
+      var uname = esc(u.username);
+      html += '<tr><td>' + (i + 1) + '</td>' +
+        '<td>' + uname + '</td>' +
+        '<td><span class="pwd-cell"><span class="pwd-dots" data-pwd="' + esc(u.password) + '">••••••</span>' +
+          '<button class="btn btn-default btn-sm" onclick="togglePwd(this)">显示</button></span></td>' +
+        '<td class="row-actions">' +
+          '<button class="btn btn-default btn-sm" onclick="resetUserPwd(\'' + uname + '\')">重置密码</button>' +
+          '<button class="btn btn-danger btn-sm" onclick="delUser(\'' + uname + '\')">删除</button>' +
+        '</td></tr>';
+    });
+    if (!html) html = '<tr><td colspan="4" class="empty">暂无用户，请在左侧添加</td></tr>';
+    document.getElementById('userRows').innerHTML = html;
+    document.getElementById('statTotal').textContent = users.length;
+    document.getElementById('statNormal').textContent = users.length;
+  }).catch(function(){ toast('加载用户失败', false); });
+}
+function togglePwd(btn) {
+  var dots = btn.parentNode.querySelector('.pwd-dots');
+  if (dots.textContent === '••••••') {
+    dots.textContent = dots.getAttribute('data-pwd');
+    btn.textContent = '隐藏';
+  } else {
+    dots.textContent = '••••••';
+    btn.textContent = '显示';
+  }
+}
+function addUser() {
+  var username = document.getElementById('newUserName').value.trim();
+  var password = document.getElementById('newUserPwd').value.trim();
+  if (!username) return toast('请输入用户名', false);
+  if (username === 'admin') return toast('admin 为系统内置管理账号，不可添加', false);
+  if (!password) return toast('请设置登录密码', false);
+  api('addUser', { username: username, userPwd: password }).then(function(res) {
+    if (res.code !== 0) return errOut(res);
+    document.getElementById('newUserName').value = '';
+    document.getElementById('newUserPwd').value = '';
+    toast('用户已添加', true);
+    loadUsers();
+  });
+}
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Enter' && !document.getElementById('view-users').classList.contains('hidden')) {
+    var t = e.target;
+    if (t && (t.id === 'newUserName' || t.id === 'newUserPwd')) addUser();
+  }
+});
+function delUser(username) {
+  if (!confirm('确定删除用户「' + username + '」？删除后该用户将无法登录。')) return;
+  api('delUser', { username: username }).then(function(res) {
+    if (res.code !== 0) return errOut(res);
+    toast('用户已删除', true);
+    loadUsers();
+  });
+}
+function resetUserPwd(username) {
+  var pwd = prompt('为用户「' + username + '」设置新登录密码：');
+  if (pwd == null || pwd === '') return;
+  api('resetUserPwd', { username: username, userPwd: pwd.trim() }).then(function(res) {
+    if (res.code !== 0) return errOut(res);
+    toast('密码已重置', true);
+    loadUsers();
+  });
+}
+
+/* ---------- 页面文案 ---------- */
+/* 字段可读标题与注释（key 为内部字段名，页面上隐藏） */
+var PAGE_META = {
+  vv: { t: '下注总计', d: '下注统计栏的显示标签' },
+  reduceButton: { t: '吃码按钮', d: '页面"吃码"操作的按钮文字' },
+  caculDesc: { t: '上报金额总计前缀', d: '上报金额统计栏的前缀文字' },
+  addkm: { t: '新增彩票种类按钮', d: '新增彩票种类的按钮文字' },
+  reduceButtonDesc: { t: '吃码总计前缀', d: '吃码统计栏的前缀文字' },
+  nv: { t: '扣返水按钮', d: '"扣返水"操作的按钮文字' },
+  displayTotal: { t: '总单客户标签', d: '总单客户统计栏的显示标签' },
+  reduceCacheButton: { t: '扣存储按钮', d: '"扣存储"操作的按钮文字' },
+  hzCheck: { t: '兑奖按钮', d: '"兑奖"操作的按钮文字' },
+  hzChosen: { t: '开奖号码标签', d: '开奖号码区域的显示标签' },
+  loginEmail: { t: '登录账号后缀', d: '登录账号输入框的后缀文字（@）' },
+  parseDesc: { t: '风险评估提示', d: '进入评估页面时的提示说明' },
+  reduceTotal: { t: '金额总计前缀', d: '金额统计栏的前缀文字' },
+  dv: { t: '扣损耗按钮', d: '"扣损耗"操作的按钮文字' },
+  ygPl: { t: '预选吃码按钮', d: '"预选吃码"操作的按钮文字' },
+  clearButton: { t: '清除存储按钮', d: '"清除存储"操作的按钮文字' },
+  orderIdName: { t: '投注号码列标题', d: '订单表格"投注号码"列的标题' },
+  parseButton: { t: '提交按钮', d: '"提交"按钮的文字' },
+  saveButton: { t: '存储订单按钮', d: '"存储订单"按钮的文字' },
+  changeClz: { t: '选择彩种下拉', d: '选择彩种下拉框的提示文字' },
+  wv: { t: '盈亏列标题', d: '订单表格"盈亏"列的标题' },
+  changeCs: { t: '选择客户下拉', d: '选择客户下拉框的提示文字' },
+  uv: { t: '中奖金额列标题', d: '订单表格"中奖金额"列的标题' },
+  km: { t: '彩票名称列标题', d: '订单表格"彩票名称"列的标题' },
+  cacheTimeDesc: { t: '存储次数标签', d: '存储次数统计栏的显示标签' },
+  rightTotal: { t: '总金额列标题', d: '订单表格"总金额"列的标题' },
+  addClz: { t: '设置彩种按钮', d: '"设置彩种"按钮的文字' },
+  numberName: { t: '下注金额列标题', d: '订单表格"下注金额"列的标题' },
+  copyButton: { t: '复制上报按钮', d: '"复制上报"按钮的文字' },
+  mv: { t: '返水列标题', d: '订单表格"返水"列的标题' },
+  ygOrderId: { t: '投注号码列标题(预选)', d: '预选区域的"投注号码"列标题' },
+  gv: { t: '倍率列标题', d: '订单表格"倍率"列的标题' },
+  reducePlaceHolder: { t: '输入框占位符', d: '吃码/输入框的默认占位文字' },
+  cv: { t: '损耗标签', d: '"损耗"栏的标签文字' },
+  addCs: { t: '设置用户按钮', d: '"设置用户"按钮的文字' },
+  contactDesc: { t: '联系/更新提示', d: '页面底部的联系信息或更新提示' },
+  ygNumber: { t: '下注金额列标题(预选)', d: '预选区域的"下注金额"列标题' },
+  clearParseButton: { t: '清空按钮', d: '"清空"按钮的文字' },
+  zv: { t: '返水比例列标题', d: '订单表格"返水%"列的标题' },
+  desc: { t: '系统升级说明', d: '登录页/关于页的系统升级说明文字' }
+};
+var pageData = {};
+function loadPage() {
+  api('getPage').then(function(res) {
+    if (res.code !== 0) return errOut(res);
+    pageData = res.data || {};
+    renderPage();
+  });
+}
+function renderPage() {
+  var html = '';
+  var keys = Object.keys(pageData);
+  keys.forEach(function(k, i) {
+    var meta = PAGE_META[k] || { t: k, d: '自定义字段' };
+    html += '<tr><td>' + (i + 1) + '</td>' +
+      '<td><div class="cell-title">' + esc(meta.t) + '</div><div class="cell-note">' + esc(meta.d) + '</div></td>' +
+      '<td><input value="' + esc(pageData[k]) + '" data-key="' + esc(k) + '" class="page-val"></td></tr>';
+  });
+  if (!html) html = '<tr><td colspan="3" class="empty">暂无文案配置</td></tr>';
+  document.getElementById('pageRows').innerHTML = html;
+}
+var pageNewSeq = 1;
+function addPageRow() {
+  var key = 'new_field_' + pageNewSeq++;
+  while (key in pageData) key = 'new_field_' + pageNewSeq++;
+  pageData[key] = '';
+  renderPage();
+}
+function savePage() {
+  var next = {};
+  document.querySelectorAll('#pageRows .page-val').forEach(function(inp) {
+    var key = inp.getAttribute('data-key');
+    if (key) next[key] = inp.value;
+  });
+  api('savePage', { page: next }).then(function(res) {
+    if (res.code !== 0) return errOut(res);
+    toast('文案已保存', true);
+    loadPage();
+  });
+}
+
+/* ---------- 解析规则 ---------- */
+function loadRule() {
+  api('getRule').then(function(res) {
+    if (res.code !== 0) return errOut(res);
+    document.getElementById('ruleSizeTag').textContent = '当前 ' + fmtSize(res.data.size);
+  });
+}
+function fetchRule() {
+  fetch('/parse_rule.txt').then(function(r){ return r.text(); }).then(function(t) {
+    document.getElementById('ruleText').value = t;
+    toast('已从本地文件加载', true);
+  }).catch(function(){ toast('读取失败', false); });
+}
+function saveRule() {
+  var text = document.getElementById('ruleText').value;
+  api('updateRule', { rule: text }).then(function(res) {
+    if (res.code !== 0) return errOut(res);
+    toast('规则已保存并生效', true);
+    loadRule();
+  });
+}
+
+/* ---------- 系统设置 ---------- */
+function loadEndTime() {
+  api('overview').then(function(res) {
+    if (res.code !== 0) return errOut(res);
+    document.getElementById('endTimeInput').value = res.data.end_time;
+  });
+}
+function updatePassword() {
+  var oldP = document.getElementById('oldPwd').value;
+  var np = document.getElementById('newPwd').value;
+  var cp = document.getElementById('confirmPwd').value;
+  if (oldP !== PASSWORD) return toast('当前管理密码不正确', false);
+  if (!np) return toast('新密码不能为空', false);
+  if (np !== cp) return toast('两次输入的新密码不一致', false);
+  api('updatePassword', { password: oldP, newPassword: np }).then(function(res) {
+    if (res.code !== 0) return errOut(res);
+    PASSWORD = np;
+    localStorage.setItem('aipaqu_admin_pwd', np);
+    document.getElementById('oldPwd').value = '';
+    document.getElementById('newPwd').value = '';
+    document.getElementById('confirmPwd').value = '';
+    toast('密码已更新', true);
+  });
+}
+function updateEndTime() {
+  var et = document.getElementById('endTimeInput').value;
+  if (!et) return toast('请选择日期', false);
+  api('updateEndTime', { endTime: et }).then(function(res) {
+    if (res.code !== 0) return errOut(res);
+    toast('到期时间已更新', true);
+  });
+}
+
+/* ---------- 工具 ---------- */
+function esc(s) {
+  return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+function errOut(res) {
+  if (res.code === 999) {
+    toast(res.msg || '密码已失效，请重新登录', false);
+    setTimeout(function(){ localStorage.removeItem('aipaqu_admin_pwd'); location.reload(); }, 800);
+  } else {
+    toast(res.msg || '操作失败', false);
+  }
+}
+
+/* ---------- 启动 ---------- */
+(function() {
+  document.getElementById('loginPwd').focus();
+  if (PASSWORD) {
+    api('overview').then(function(res) {
+      if (res.code === 0) {
+        document.getElementById('loginPage').classList.add('hidden');
+        document.getElementById('appPage').classList.remove('hidden');
+        loadOverview(); loadRule(); loadEndTime();
+      } else {
+        localStorage.removeItem('aipaqu_admin_pwd');
+      }
+    }).catch(function(){});
+  }
+})();
+</script>
+</body>
+</html>

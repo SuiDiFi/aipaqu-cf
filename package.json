@@ -1,0 +1,14 @@
+{
+  "name": "aipaqu-cf",
+  "version": "1.0.0",
+  "private": true,
+  "description": "AI智能统计系统 Cloudflare 部署版（Pages + Functions + KV）",
+  "scripts": {
+    "dev": "wrangler pages dev .",
+    "deploy": "wrangler pages deploy . --project-name aipaqu-cf",
+    "init:kv": "node scripts/init_kv.mjs"
+  },
+  "devDependencies": {
+    "wrangler": "^4.124.0"
+  }
+}
