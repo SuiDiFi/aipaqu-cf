@@ -91,9 +91,13 @@ async function checkToken(env, token) {
   const decoded = b64urlDecode(payload);
   const expect = await hmacSign(secret, decoded);
   if (expect !== sig) return false;
-  const endTime = decoded.split('|')[1];
-  if (!endTime) return false;
-  return new Date(endTime) > new Date();
+  const [username, endTime] = decoded.split('|');
+  if (!username || !endTime) return false;
+  if (new Date(endTime) <= new Date()) return false;
+  // 校验用户是否仍存在：管理后台删除用户后，其 token 立即失效（修复删除用户后仍可继续使用的 bug）
+  const users = await getUsers(env);
+  if (!users.some((u) => u.username === username)) return false;
+  return true;
 }
 
 // ---------- 业务接口 ----------
