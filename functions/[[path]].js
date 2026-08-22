@@ -94,6 +94,8 @@ async function checkToken(env, token) {
   const [username, endTime] = decoded.split('|');
   if (!username || !endTime) return false;
   if (new Date(endTime) <= new Date()) return false;
+  // admin 为系统内置管理账号，仅用于管理后台，业务接口一律拒绝
+  if (username === 'admin') return false;
   // 校验用户是否仍存在：管理后台删除用户后，其 token 立即失效（修复删除用户后仍可继续使用的 bug）
   const users = await getUsers(env);
   if (!users.some((u) => u.username === username)) return false;
@@ -104,7 +106,8 @@ async function checkToken(env, token) {
 async function login(body, env) {
   const pwd = body.password || '';
   const users = await getUsers(env);
-  const user = users.find((u) => u.password === pwd);
+  // 业务端禁止 admin 登录（admin 为系统内置管理账号，仅用于管理后台）
+  const user = users.find((u) => u.username !== 'admin' && u.password === pwd);
   if (!user) {
     const count = (parseInt(await env.AIPAQ_DATA.get('fail_count')) || 0) + 1;
     await env.AIPAQ_DATA.put('fail_count', String(count));
